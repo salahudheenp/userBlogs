@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String,
   },
+  blogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blog' }]
 });
 
 // Create and export the User model

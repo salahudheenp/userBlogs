@@ -77,18 +77,19 @@ module.exports = { registerUser, userLogin };
 
 const getUsersWithBlogs = async (req, res) => {
   try {
-    console.log("!!!!!!!!!!!!!!!!!!!!!!");
-    
-    const users = await User.find()
-console.log(users,"$$$$$$$$$$$$$$$$$$");
-    const blogs = await Blog.find({ author: users[0]._id })
-console.log(blogs,"@@@@@@@@@@@@@@############");
+    // Use `populate` to retrieve blogs directly associated with users
+    const usersWithBlogs = await User.find().lean().populate({
+      path: 'blogs', // Ensure the User model has a reference to Blog in its schema
+      select: 'title content', // Specify the fields to include from the Blog model
+    });
 
-    const UsersWithBlogs = {username : users[0].username, blogs:blogs}
-    console.log(UsersWithBlogs,"))))))))))))))");
+    // Transform the response if necessary
+    const formattedResponse = usersWithBlogs.map(user => ({
+      username: user.username,
+      blogs: user.blogs || [],
+    }));
 
-    
-    res.status(200).json(UsersWithBlogs);
+    res.status(200).json(formattedResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
